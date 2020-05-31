@@ -1,0 +1,17 @@
+{
+  "name": "test-rn-threads-and-sqlite",
+  "displayName": "test-rn-threads-and-sqlite",
+  "expo": {
+    "name": "test-rn-threads-and-sqlite",
+    "slug": "expo-template-bare",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
