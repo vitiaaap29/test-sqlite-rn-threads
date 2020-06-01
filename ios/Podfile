@@ -43,4 +43,6 @@ target 'testrnthreadsandsqlite' do
 
   # react-native-cli autolinking
   use_native_modules!
+  pod 'RNThread', :path => '../node_modules/react-native-threads'
+
 end

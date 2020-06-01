@@ -6,6 +6,7 @@ import android.net.Uri;
 
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.RNThreadPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -25,7 +26,12 @@ import expo.modules.updates.UpdatesController;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import javax.annotation.Nullable;
+
+import org.pgsqlite.SQLitePluginPackage;
 
 public class MainApplication extends Application implements ReactApplication {
   private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
@@ -42,6 +48,31 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+      // packages.add(new MyReactNativePackage());
+      boolean yetInit = false;
+      for (int i = 0; i < packages.size(); i++) {
+        if(packages.get(i) instanceof RNThreadPackage) {
+
+          ReactPackage rnThreadPackageI = null;
+          Optional<ReactPackage> sqlitePackage = packages
+            .stream()
+            .filter(packageItem -> packageItem instanceof SQLitePluginPackage)
+            .findFirst();
+          if(sqlitePackage.isPresent()) {
+            rnThreadPackageI = new RNThreadPackage(mReactNativeHost, sqlitePackage.get());
+          } else {
+            rnThreadPackageI = new RNThreadPackage(mReactNativeHost);
+          }
+          packages.set(i, rnThreadPackageI);
+          yetInit = true;
+        }
+      }
+
+      if(!yetInit) {
+        RNThreadPackage rnThreadPackage = new RNThreadPackage(mReactNativeHost);
+        packages.add(rnThreadPackage);
+      }
+
       return packages;
     }
 
