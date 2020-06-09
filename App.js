@@ -3,16 +3,17 @@ import { Placeholder,
   PlaceholderMedia,
   PlaceholderLine,
   Loader,
-  ShineOverlay,
-  Fade } from 'rn-placeholder'
-import { Platform, StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+  ShineOverlay
+} from 'rn-placeholder'
+import { Platform, StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native'
+
+import { createDbInstance } from './db'
 
 const instructions = Platform.select({
   ios: `Press Cmd+R to reload,\nCmd+D or shake for dev menu`,
   android: `Double tap R on your keyboard to reload,\nShake or press menu button for dev menu`,
 });
 
-import SQLite from 'react-native-sqlite-storage'
 import { Thread } from 'react-native-threads'
 
 const styles2 = StyleSheet.create({
@@ -42,42 +43,27 @@ function Item({name, id}) {
 }
 
 export default function App() {
-  const db = SQLite.openDatabase({
-    name: 'TestDB.db',
-    location: 'default',
-    createFromLocation: '~www/test-v.db',
-  }, (s) => {
-    console.log('ddd', s)
-  }, (er) => {
-    console.warn('ddd ----',er)
-  })
-  db.executeSql('PRAGMA journal_mode=WAL;')
+  const db = createDbInstance()
+  const orderItems = db.collections.get('order_items')
 
   // start a new react native JS process
   const thread = new Thread('./worker.thread.js');
 
   const [users, setUsers] = React.useState([]);
 
-  function onClick() {
-    db.transaction((tx) => {
-      tx.executeSql('SELECT * FROM Employee', [], (txx, results) => {
-        const usersList = []
-        const len = results.rows.length
-        for (let i = 0; i < len; i++) {
-          let row = results.rows.item(i);
-          usersList.push(row)
-        }
-        setUsers(usersList)
-      }, err => {
-        console.log('eee', err)
-      })
+  async function onClick() {
+    const newOrderItem = await orderItems.create(oi => {
+      oi.name = 'New post' + new Date().getMilliseconds()
+      oi.barCode = 1232
+      oi.quantity = Math.random() * 1000
     })
+    const allItems = await orderItems.query().fetch()
+    setUsers(allItems)
 
     thread.postMessage(JSON.stringify({type: 'ADD_EMP', name: 'Valera ' + new Date().toLocaleDateString()}));
     thread.onmessage = (message) => console.log(message);
   }
 
-  // console.log('USERS => ', JSON.stringify(users))
   console.disableYellowBox = true
 
   return (
@@ -104,7 +90,6 @@ export default function App() {
       </Placeholder>
 
       <Text style={styles.instructions}>{instructions}</Text>
-
 
     </View>
   );

@@ -12,6 +12,8 @@
     "build:apk": "yarn bundle:android && yarn build:android"
   },
   "dependencies": {
+    "@nozbe/watermelondb": "^0.15.1",
+    "@nozbe/with-observables": "^1.0.5",
     "expo": "~37.0.3",
     "expo-splash-screen": "^0.2.3",
     "expo-updates": "~0.2.0",
@@ -21,11 +23,11 @@
     "react-native-gesture-handler": "~1.6.0",
     "react-native-reanimated": "~1.7.0",
     "react-native-screens": "~2.2.0",
-    "rn-placeholder": "^3.0.0",
     "react-native-sqlite-storage": "^5.0.0",
     "react-native-threads": "https://github.com/joltup/react-native-threads#e8a9d68cd9b0a7d289ead366e6a427339f875f4c",
     "react-native-unimodules": "~0.9.0",
-    "react-native-web": "~0.11.7"
+    "react-native-web": "~0.11.7",
+    "rn-placeholder": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",
