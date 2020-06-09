@@ -33,6 +33,8 @@ import javax.annotation.Nullable;
 
 import org.pgsqlite.SQLitePluginPackage;
 
+import com.nozbe.watermelondb.WatermelonDBPackage;
+
 public class MainApplication extends Application implements ReactApplication {
   private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(
     new BasePackageList().getPackageList()
@@ -48,21 +50,14 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+
+      WatermelonDBPackage dBPackage = new WatermelonDBPackage();
+      packages.add(dBPackage);
       // packages.add(new MyReactNativePackage());
       boolean yetInit = false;
       for (int i = 0; i < packages.size(); i++) {
         if(packages.get(i) instanceof RNThreadPackage) {
-
-          ReactPackage rnThreadPackageI = null;
-          Optional<ReactPackage> sqlitePackage = packages
-            .stream()
-            .filter(packageItem -> packageItem instanceof SQLitePluginPackage)
-            .findFirst();
-          if(sqlitePackage.isPresent()) {
-            rnThreadPackageI = new RNThreadPackage(mReactNativeHost, sqlitePackage.get());
-          } else {
-            rnThreadPackageI = new RNThreadPackage(mReactNativeHost);
-          }
+          ReactPackage rnThreadPackageI = new RNThreadPackage(mReactNativeHost, dBPackage);
           packages.set(i, rnThreadPackageI);
           yetInit = true;
         }
