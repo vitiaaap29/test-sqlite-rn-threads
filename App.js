@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Placeholder,
+import {
+  Placeholder,
   PlaceholderMedia,
   PlaceholderLine,
   Loader,
   ShineOverlay
 } from 'rn-placeholder'
+
 import { Platform, StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native'
 
 import { createDbInstance } from './db'
@@ -42,9 +44,22 @@ function Item({name, id}) {
   );
 }
 
+const getCircularReplacer = () => {
+  const seen = new WeakSet();
+  return (key, value) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return;
+      }
+      seen.add(value);
+    }
+    return value;
+  };
+};
+
 export default function App() {
   const db = createDbInstance()
-  const orderItems = db.collections.get('order_items')
+
 
   // start a new react native JS process
   const thread = new Thread('./worker.thread.js');
@@ -52,12 +67,26 @@ export default function App() {
   const [users, setUsers] = React.useState([]);
 
   async function onClick() {
-    const newOrderItem = await orderItems.create(oi => {
-      oi.name = 'New post' + new Date().getMilliseconds()
-      oi.barCode = 1232
-      oi.quantity = Math.random() * 1000
-    })
-    const allItems = await orderItems.query().fetch()
+    console.warn('DBBB:', JSON.stringify(db.collections, getCircularReplacer()))
+    const orderItemsCollection = db.collections.get('order_item')
+  
+    console.log('orderItemsCollection', orderItemsCollection)
+
+    try {
+      await db.action(async () => {
+        const newOrderItem = await orderItemsCollection.create(oi => {
+          oi.name = 'New post' + new Date().getTime()
+          oi.barCode = 1232
+          oi.quantity = Math.random() * 1000
+        })
+        console.warn('newOrderItem', newOrderItem)
+      })
+    } catch (error) {
+      console.log('orderItemsCollection', error)
+    }
+
+    const allItems = await orderItemsCollection.query().fetch()
+    console.log('onClick', allItems)
     setUsers(allItems)
 
     thread.postMessage(JSON.stringify({type: 'ADD_EMP', name: 'Valera ' + new Date().toLocaleDateString()}));
@@ -79,7 +108,7 @@ export default function App() {
           renderItem={({item}) => <Item name={item.name} id={item.id}/>}
           keyExtractor={item => item.id}
         />
-      <Placeholder
+      {/* <Placeholder
         Animation={ShineOverlay}
         Left={PlaceholderMedia}
         Right={PlaceholderMedia}
@@ -87,7 +116,7 @@ export default function App() {
         <PlaceholderLine width={180} />
         <PlaceholderLine />
         <PlaceholderLine width={180} />
-      </Placeholder>
+      </Placeholder> */}
 
       <Text style={styles.instructions}>{instructions}</Text>
 

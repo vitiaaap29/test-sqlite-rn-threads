@@ -4,12 +4,17 @@ import { field } from '@nozbe/watermelondb/decorators'
 
 import { DbTypes } from './constants'
 
+const Tables = {
+  ORDER_ITEM: 'order_item',
+  ADDON: 'addon'
+}
+
 export class OrderItem extends Model {
-  static name = 'order_item'
+  static table = Tables.ORDER_ITEM
 
   static get schema() {
     return {
-      name: OrderItem.name,
+      name: Tables.ORDER_ITEM,
       columns: [
         { name: 'name', type: DbTypes.STRING, isOptional: true },
         { name: 'bar_code', type: DbTypes.STRING, isOptional: true },
@@ -24,11 +29,11 @@ export class OrderItem extends Model {
 }
 
 export class Addon extends Model {
-  static name = 'addons'
+  static table = Tables.ADDON
 
   static get schema() {
     return {
-      name: Addon.name,
+      name: Tables.ADDON,
       columns: [
         { name: 'title', type: DbTypes.STRING, isOptional: true },
       ],
@@ -36,7 +41,6 @@ export class Addon extends Model {
   }
 
   @field('title') title
-
 }
 
 export function createDbInstance() {
@@ -48,7 +52,7 @@ export function createDbInstance() {
     ]
   })
 
-  const dbAdapter = new SQLiteAdapter({ schema })
+  const dbAdapter = new SQLiteAdapter({ schema, dbName: 'TestDB' })
 
   const db = new Database({
     modelClasses: [Addon, OrderItem],
